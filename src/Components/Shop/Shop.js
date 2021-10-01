@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Form, FormControl } from 'react-bootstrap';
-import Card from '../Card/Card';
+import { addToDb, getStoredCart } from '../../utilities/fakedb';
+import Cart from '../Cart/Cart';
 import Products from '../Products/Products';
 
 const Shop = () => {
@@ -14,9 +15,28 @@ const Shop = () => {
             .then(data => setProducts(data))
     }, []);
 
+    useEffect(() => {
+        if (products.length) {
+            const savedCart = getStoredCart();
+            const storedCart = [];
+            for (const key in savedCart) {
+                const addedProduct = products.find(product => product.key === key)
+                if (addedProduct) {
+                    const quantity = savedCart[key];
+                    addedProduct.quantity = quantity;
+                    storedCart.push(addedProduct);
+                }
+            }
+            setOrdered(storedCart);
+        }
+    }, [products]);
+
     const handleProductItem = product => {
         const totalOrdered = [...ordered, product];
         setOrdered(totalOrdered);
+        // add to local storage here
+        addToDb(product.key);
+
     }
 
     return (
@@ -26,7 +46,7 @@ const Shop = () => {
                 <Form className="p-2 w-75 mx-auto">
                     <FormControl
                         type="search"
-                        placeholder="Search"
+                        placeholder="Search Products here"
                         className="me-2"
                         aria-label="Search"
                     />
@@ -45,7 +65,7 @@ const Shop = () => {
                         }
                     </div>
                     <div className="col-md-3">
-                        <Card ordered={ordered}></Card>
+                        <Cart ordered={ordered}></Cart>
                     </div>
                 </div>
 
