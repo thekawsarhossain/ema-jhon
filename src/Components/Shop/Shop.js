@@ -8,11 +8,15 @@ const Shop = () => {
 
     const [products, setProducts] = useState([]);
     const [ordered, setOrdered] = useState([]);
+    const [searchProducts, setSearchProducts] = useState([]);
 
     useEffect(() => {
         fetch('/products.JSON')
             .then(response => response.json())
-            .then(data => setProducts(data))
+            .then(data => {
+                setProducts(data);
+                setSearchProducts(data);
+            })
     }, []);
 
     useEffect(() => {
@@ -31,6 +35,12 @@ const Shop = () => {
         }
     }, [products]);
 
+    const handleSearch = event => {
+        const searchedValue = event.target.value;
+        const searchedProducts = products.filter(product => product.name.toLowerCase().includes(searchedValue.toLowerCase()));
+        setSearchProducts(searchedProducts);
+    }
+
     const handleProductItem = product => {
         const totalOrdered = [...ordered, product];
         setOrdered(totalOrdered);
@@ -45,6 +55,7 @@ const Shop = () => {
             <div style={{ backgroundColor: "#333" }}>
                 <Form className="p-2 w-75 mx-auto">
                     <FormControl
+                        onChange={handleSearch}
                         type="search"
                         placeholder="Search Products here"
                         className="me-2"
@@ -57,7 +68,7 @@ const Shop = () => {
                 <div className="row">
                     <div className="col-md-9 border">
                         {
-                            products.map(product => <Products
+                            searchProducts.map(product => <Products
                                 key={product.key}
                                 product={product}
                                 handleProductItem={handleProductItem}
